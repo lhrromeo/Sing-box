@@ -40,7 +40,7 @@ install_singbox() {
         aarch64|arm64) ARCH=arm64 ;;
         armv7l) ARCH=armv7 ;;
         i386|i686) ARCH=386 ;;
-        *) red "Unsupported arch: $ARCH_RAW"; exit 1 ;;
+        *) red "Unsupported arch: $ARCH_RAW"; return ;;
     esac
 
     curl -sLo "$work_dir/sing-box" "https://$ARCH.ssss.nyc.mn/sbx"
@@ -87,6 +87,7 @@ EOF
     green "Installed successfully, config: $config_dir"
 
     # create shortcut 'lw'
+    mkdir -p "$HOME/.local/bin"
     cat > "$HOME/.local/bin/lw" <<EOF
 #!/usr/bin/env bash
 bash "$work_dir/launcher.sh" "\$@"
@@ -130,7 +131,6 @@ stop_sub_server() {
 
 # Menu
 menu() {
-    clear
     purple "=== sing-box User Mode Manager ==="
     echo "1. Install sing-box"
     echo "2. Start sing-box"
@@ -154,4 +154,5 @@ menu() {
 
 while true; do
     menu
+    echo # 空行分隔，避免闪动
 done
