@@ -7,7 +7,7 @@ re="\033[0m"
 red() { echo -e "\e[1;91m$1$re"; }
 green() { echo -e "\e[1;32m$1$re"; }
 purple() { echo -e "\e[1;35m$1$re"; }
-reading() { read -p "$(red "$1")" "$2"; }
+reading() { read -p "$1" "$2"; }
 
 # 路径
 work_dir="$HOME/.sing-box"
@@ -16,7 +16,9 @@ mkdir -p "$work_dir"
 chmod 700 "$work_dir"
 export vless_port=${PORT:-$(shuf -i 10000-65000 -n 1)}
 
-# 安装 sing-box
+# ----------------------
+# 功能函数
+# ----------------------
 install_singbox() {
     purple "正在安装 sing-box..."
     ARCH_RAW=$(uname -m)
@@ -71,7 +73,6 @@ EOF
     green "安装完成，配置文件路径: $config_dir"
 }
 
-# 启动/停止
 start_singbox() {
     nohup "$work_dir/sing-box" run -c "$config_dir" >"$work_dir/singbox.log" 2>&1 &
     echo $! > "$work_dir/singbox.pid"
@@ -97,8 +98,10 @@ stop_sub_server() {
     green "订阅服务已停止"
 }
 
-# 打印菜单一次，记录行号
-print_menu_once() {
+# ----------------------
+# 菜单只打印一次
+# ----------------------
+print_menu() {
     purple "=== sing-box 用户模式管理器 ==="
     echo "1. 安装 sing-box"
     echo "2. 启动 sing-box"
@@ -110,12 +113,9 @@ print_menu_once() {
     echo
 }
 
-# 保存菜单所在行号
-menu_line=$(tput lines)
-clear
-print_menu_once
+print_menu
 
-# 无限循环处理选择，菜单不刷新
+# 无限循环，但菜单不刷新
 while true; do
     reading "请输入选择: " choice
     case "$choice" in
@@ -128,5 +128,6 @@ while true; do
         0) exit 0 ;;
         *) red "无效选择" ;;
     esac
-    reading "操作完成，按回车返回菜单..." dummy
+    reading "操作完成，按回车继续..." dummy
+    echo
 done
