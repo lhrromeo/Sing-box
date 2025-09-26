@@ -1,39 +1,24 @@
 #!/usr/bin/env bash
 
-# =========================
-# sing-box 四合一 安装脚本 (用户模式)
-# vless-reality | vmess-ws | hysteria2 | tuic5
-# Run without root/systemd/firewall
-# Install path: ~/.sing-box
-# =========================
-
 export LANG=en_US.UTF-8
 
-# Colors
+# 颜色定义
 re="\033[0m"
 red() { echo -e "\e[1;91m$1$re"; }
 green() { echo -e "\e[1;32m$1$re"; }
-yellow() { echo -e "\e[1;33m$1$re"; }
 purple() { echo -e "\e[1;35m$1$re"; }
-skyblue() { echo -e "\e[1;36m$1$re"; }
 reading() { read -p "$(red "$1")" "$2"; }
 
-# Paths
+# 路径
 work_dir="$HOME/.sing-box"
 config_dir="$work_dir/config.json"
-client_dir="$work_dir/url.txt"
-export vless_port=${PORT:-$(shuf -i 10000-65000 -n 1)}
-
 mkdir -p "$work_dir"
 chmod 700 "$work_dir"
+export vless_port=${PORT:-$(shuf -i 10000-65000 -n 1)}
 
-# Command exists check
-command_exists() { command -v "$1" >/dev/null 2>&1; }
-
-# Install sing-box
+# 安装 sing-box
 install_singbox() {
-    purple "正在安装 sing-box (用户模式)..."
-
+    purple "正在安装 sing-box..."
     ARCH_RAW=$(uname -m)
     case "$ARCH_RAW" in
         x86_64) ARCH=amd64 ;;
@@ -52,7 +37,6 @@ install_singbox() {
     password=$(< /dev/urandom tr -dc 'A-Za-z0-9' | head -c 24)
     output=$("$work_dir/sing-box" generate reality-keypair)
     private_key=$(echo "$output" | awk '/PrivateKey:/ {print $2}')
-    public_key=$(echo "$output" | awk '/PublicKey:/ {print $2}')
 
     nginx_port=$(($vless_port + 1))
     tuic_port=$(($vless_port + 2))
@@ -85,24 +69,9 @@ cat > "$config_dir" <<EOF
 EOF
 
     green "安装完成，配置文件路径: $config_dir"
-
-    # create shortcut 'lw'
-    mkdir -p "$HOME/.local/bin"
-    cat > "$HOME/.local/bin/lw" <<EOF
-#!/usr/bin/env bash
-bash "$work_dir/launcher.sh" "\$@"
-EOF
-    chmod +x "$HOME/.local/bin/lw"
-
-    cat > "$work_dir/launcher.sh" <<EOF
-#!/usr/bin/env bash
-source "$0"
-EOF
-    chmod +x "$work_dir/launcher.sh"
-    green "快捷命令创建完成: lw"
 }
 
-# Start/Stop
+# 启动/停止函数
 start_singbox() {
     nohup "$work_dir/sing-box" run -c "$config_dir" >"$work_dir/singbox.log" 2>&1 &
     echo $! > "$work_dir/singbox.pid"
@@ -116,7 +85,6 @@ stop_singbox() {
 
 restart_singbox() { stop_singbox; sleep 1; start_singbox; }
 
-# Simple http server for subscription
 start_sub_server() {
     cd "$work_dir"
     nohup python3 -m http.server 8080 >"$work_dir/http.log" 2>&1 &
@@ -129,17 +97,21 @@ stop_sub_server() {
     green "订阅服务已停止"
 }
 
-# Menu
-menu() {
-    clear  # 清屏，避免闪动
+# 打印菜单一次
+print_menu() {
     purple "=== sing-box 用户模式管理器 ==="
     echo "1. 安装 sing-box"
     echo "2. 启动 sing-box"
     echo "3. 停止 sing-box"
     echo "4. 重启 sing-box"
-    echo "5. 启动订阅服务 (python http.server)"
+    echo "5. 启动订阅服务"
     echo "6. 停止订阅服务"
     echo "0. 退出"
+}
+
+# 无限循环菜单，不闪动
+while true; do
+    print_menu
     reading "请输入选择: " choice
     case "$choice" in
         1) install_singbox ;;
@@ -151,10 +123,6 @@ menu() {
         0) exit 0 ;;
         *) red "无效选择" ;;
     esac
-    reading "按回车返回菜单..." dummy
-}
-
-# 无限循环菜单
-while true; do
-    menu
+    reading "操作完成，按回车返回菜单..." dummy
+    echo
 done
