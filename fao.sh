@@ -131,6 +131,7 @@ stop_sub_server() {
 
 # Menu
 menu() {
+    clear
     purple "=== sing-box 用户模式管理器 ==="
     echo "1. 安装 sing-box"
     echo "2. 启动 sing-box"
@@ -152,8 +153,8 @@ menu() {
     esac
     reading "按回车返回菜单..." dummy
 }
-
 while true; do
     menu
     echo # 空行分隔
 done
+
