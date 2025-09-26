@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # =========================
-# sing-box 四合一 安装脚本 (User Mode)
+# sing-box 四合一 安装脚本 (用户模式)
 # vless-reality | vmess-ws | hysteria2 | tuic5
 # Run without root/systemd/firewall
 # Install path: ~/.sing-box
@@ -131,7 +131,7 @@ stop_sub_server() {
 
 # Menu
 menu() {
-    clear
+    clear  # 清屏，避免闪动
     purple "=== sing-box 用户模式管理器 ==="
     echo "1. 安装 sing-box"
     echo "2. 启动 sing-box"
@@ -153,8 +153,8 @@ menu() {
     esac
     reading "按回车返回菜单..." dummy
 }
+
+# 无限循环菜单
 while true; do
     menu
-    echo # 空行分隔
 done
-
