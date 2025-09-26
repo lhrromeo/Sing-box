@@ -153,4 +153,7 @@ menu() {
     esac
 }
 
-menu
+while true; do
+    menu
+done
+
