@@ -71,7 +71,7 @@ EOF
     green "安装完成，配置文件路径: $config_dir"
 }
 
-# 启动/停止函数
+# 启动/停止
 start_singbox() {
     nohup "$work_dir/sing-box" run -c "$config_dir" >"$work_dir/singbox.log" 2>&1 &
     echo $! > "$work_dir/singbox.pid"
@@ -93,12 +93,12 @@ start_sub_server() {
 }
 
 stop_sub_server() {
-    kill "$(cat $work_dir/http.pid 2>/dev/null)" 2>/dev/null && rm -f "$work_dir/http.pid"
+    kill "$(cat $work_dir/http.pid 2>/dev/null)" 2>&1 && rm -f "$work_dir/http.pid"
     green "订阅服务已停止"
 }
 
-# 打印菜单一次
-print_menu() {
+# 打印菜单一次，记录行号
+print_menu_once() {
     purple "=== sing-box 用户模式管理器 ==="
     echo "1. 安装 sing-box"
     echo "2. 启动 sing-box"
@@ -107,11 +107,16 @@ print_menu() {
     echo "5. 启动订阅服务"
     echo "6. 停止订阅服务"
     echo "0. 退出"
+    echo
 }
 
-# 无限循环菜单，不闪动
+# 保存菜单所在行号
+menu_line=$(tput lines)
+clear
+print_menu_once
+
+# 无限循环处理选择，菜单不刷新
 while true; do
-    print_menu
     reading "请输入选择: " choice
     case "$choice" in
         1) install_singbox ;;
@@ -124,5 +129,4 @@ while true; do
         *) red "无效选择" ;;
     esac
     reading "操作完成，按回车返回菜单..." dummy
-    echo
 done
