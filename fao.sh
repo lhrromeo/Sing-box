@@ -32,7 +32,7 @@ command_exists() { command -v "$1" >/dev/null 2>&1; }
 
 # Install sing-box
 install_singbox() {
-    purple "Installing sing-box (user mode)..."
+    purple "正在安装 sing-box (用户模式)..."
 
     ARCH_RAW=$(uname -m)
     case "$ARCH_RAW" in
@@ -40,7 +40,7 @@ install_singbox() {
         aarch64|arm64) ARCH=arm64 ;;
         armv7l) ARCH=armv7 ;;
         i386|i686) ARCH=386 ;;
-        *) red "Unsupported arch: $ARCH_RAW"; return ;;
+        *) red "不支持的架构: $ARCH_RAW"; return ;;
     esac
 
     curl -sLo "$work_dir/sing-box" "https://$ARCH.ssss.nyc.mn/sbx"
@@ -84,7 +84,7 @@ cat > "$config_dir" <<EOF
 }
 EOF
 
-    green "Installed successfully, config: $config_dir"
+    green "安装完成，配置文件路径: $config_dir"
 
     # create shortcut 'lw'
     mkdir -p "$HOME/.local/bin"
@@ -99,19 +99,19 @@ EOF
 source "$0"
 EOF
     chmod +x "$work_dir/launcher.sh"
-    green "Shortcut command created: lw"
+    green "快捷命令创建完成: lw"
 }
 
 # Start/Stop
 start_singbox() {
     nohup "$work_dir/sing-box" run -c "$config_dir" >"$work_dir/singbox.log" 2>&1 &
     echo $! > "$work_dir/singbox.pid"
-    green "sing-box started (PID: $(cat $work_dir/singbox.pid))"
+    green "sing-box 已启动 (PID: $(cat $work_dir/singbox.pid))"
 }
 
 stop_singbox() {
     kill "$(cat $work_dir/singbox.pid 2>/dev/null)" 2>/dev/null && rm -f "$work_dir/singbox.pid"
-    green "sing-box stopped"
+    green "sing-box 已停止"
 }
 
 restart_singbox() { stop_singbox; sleep 1; start_singbox; }
@@ -121,25 +121,25 @@ start_sub_server() {
     cd "$work_dir"
     nohup python3 -m http.server 8080 >"$work_dir/http.log" 2>&1 &
     echo $! > "$work_dir/http.pid"
-    green "Sub server started: http://127.0.0.1:8080/sub.txt"
+    green "订阅服务已启动: http://127.0.0.1:8080/sub.txt"
 }
 
 stop_sub_server() {
     kill "$(cat $work_dir/http.pid 2>/dev/null)" 2>/dev/null && rm -f "$work_dir/http.pid"
-    green "Sub server stopped"
+    green "订阅服务已停止"
 }
 
 # Menu
 menu() {
-    purple "=== sing-box User Mode Manager ==="
-    echo "1. Install sing-box"
-    echo "2. Start sing-box"
-    echo "3. Stop sing-box"
-    echo "4. Restart sing-box"
-    echo "5. Start subscription server (python http.server)"
-    echo "6. Stop subscription server"
-    echo "0. Exit"
-    reading "Enter choice: " choice
+    purple "=== sing-box 用户模式管理器 ==="
+    echo "1. 安装 sing-box"
+    echo "2. 启动 sing-box"
+    echo "3. 停止 sing-box"
+    echo "4. 重启 sing-box"
+    echo "5. 启动订阅服务 (python http.server)"
+    echo "6. 停止订阅服务"
+    echo "0. 退出"
+    reading "请输入选择: " choice
     case "$choice" in
         1) install_singbox ;;
         2) start_singbox ;;
@@ -148,11 +148,12 @@ menu() {
         5) start_sub_server ;;
         6) stop_sub_server ;;
         0) exit 0 ;;
-        *) red "Invalid choice" ;;
+        *) red "无效选择" ;;
     esac
+    reading "按回车返回菜单..." dummy
 }
 
 while true; do
     menu
-    echo # 空行分隔，避免闪动
+    echo # 空行分隔
 done
